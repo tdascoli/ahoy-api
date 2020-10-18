@@ -4,4 +4,5 @@
 /vendor/
 /logs/*
 !/logs/README.md
+/app/.env
 .phpunit.result.cache

@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+use App\Auth\AuthService;
+use App\Auth\JwtAuth;
 use DI\ContainerBuilder;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -23,6 +25,20 @@ return function (ContainerBuilder $containerBuilder) {
             $logger->pushHandler($handler);
 
             return $logger;
+        },
+        JwtAuth::class => function (ContainerInterface $container) {
+            $settings = $container->get('settings');
+            $config = $settings['jwt'];
+
+            $issuer = $config['issuer'];
+            $lifetime = $config['lifetime'];
+            $privateKey = $config['private_key'];
+            $publicKey = $config['public_key'];
+
+            return new JwtAuth($issuer, $lifetime, $privateKey, $publicKey);
+        },
+        AuthService::class => function (ContainerInterface $container) {
+            return new AuthService($container->get(\App\Domain\Profile\ProfileRepository::class));
         },
     ]);
 };

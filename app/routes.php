@@ -1,8 +1,8 @@
 <?php
 declare(strict_types=1);
 
-use App\Application\Actions\User\ListUsersAction;
-use App\Application\Actions\User\ViewUserAction;
+use App\Application\Actions\Auth\ProfileTokenAction;
+use App\Application\Middleware\JwtMiddleware;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App;
@@ -19,8 +19,25 @@ return function (App $app) {
         return $response;
     });
 
-    $app->group('/users', function (Group $group) {
-        $group->get('', ListUsersAction::class);
-        $group->get('/{id}', ViewUserAction::class);
+    // Auth
+    $app->group('/auth', function (Group $group) {
+        $group->post('/profile', ProfileTokenAction::class);
+    });
+
+    $app->group('/profiles', function (Group $group) {
+        $group->put('', \App\Application\Actions\Profile\PostAction::class);
+
+        $group->put('/{id}', \App\Application\Actions\Profile\UpdateAction::class)->add(JwtMiddleware::class);
+        $group->get('/{id}', \App\Application\Actions\Profile\ViewAction::class)->add(JwtMiddleware::class);
+    });
+
+    $app->group('/event', function (Group $group) {
+        $group->put('', \App\Application\Actions\Event\PostAction::class);
+        $group->get('/{id}', \App\Application\Actions\Event\ViewAction::class);
+    })->add(JwtMiddleware::class);
+
+    $app->group('/queue', function (Group $group) {
+        $group->post('/{event_id}', \App\Application\Actions\Queue\PostAction::class);
+        $group->get('/{event_id}', \App\Application\Actions\Queue\ListAction::class)->add(JwtMiddleware::class);
     });
 };

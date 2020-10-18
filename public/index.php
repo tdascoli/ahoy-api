@@ -5,6 +5,7 @@ use App\Application\Handlers\HttpErrorHandler;
 use App\Application\Handlers\ShutdownHandler;
 use App\Application\ResponseEmitter\ResponseEmitter;
 use DI\ContainerBuilder;
+use Selective\BasePath\BasePathDetector;
 use Slim\Factory\AppFactory;
 use Slim\Factory\ServerRequestCreatorFactory;
 
@@ -36,6 +37,13 @@ $container = $containerBuilder->build();
 AppFactory::setContainer($container);
 $app = AppFactory::create();
 $callableResolver = $app->getCallableResolver();
+
+// composer require selective/basepath
+
+// Set the base path to run the app in a subdirectory.
+// This path is used in urlFor().
+$basePath = (new BasePathDetector($_SERVER))->getBasePath();
+$app->setBasePath($basePath);
 
 // Register middleware
 $middleware = require __DIR__ . '/../app/middleware.php';
