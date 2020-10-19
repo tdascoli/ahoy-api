@@ -11,24 +11,30 @@ interface EventRepository
     public function list(): array;
 
     /**
+     * @param int $profile_id
+     * @return Event[]
+     */
+    public function listByProfileId(int $profile_id): array;
+
+    /**
      * @param int $id
      * @return Event
-     * @throws QueueNotFoundException
+     * @throws EventNotFoundException
      */
     public function get(int $id): Event;
 
     /**
      * @param object $event
      * @param int|null $id
-     * @return string
-     * @throws QueueNotFoundException
+     * @return Event
+     * @throws EventNotFoundException
      */
     public function post(object $event, ?int $id): Event;
 
     /**
      * @param int $id
      * @return bool
-     * @throws QueueNotFoundException
+     * @throws EventNotFoundException
      */
     public function remove(int $id): bool;
 }

@@ -12,10 +12,17 @@ class ListAction extends EventAction
      */
     protected function action(): Response
     {
-        $users = $this->repository->findAll();
+        $authorization = explode(' ', (string)$this->request->getHeaderLine('Authorization'));
+        $token = $authorization[1] ?? '';
+        $deviceId = $this->jwtAuth->getUID($token);
 
-        $this->logger->info("Users list was viewed.");
+        $profileId = (int) $this->resolveArg('profile_id');
+        $events = array();
+        if ($this->auth->verifyDeviceIdWithProfileId($deviceId, $profileId)) {
+            $events = $this->repository->listByProfileId($profileId);
+            $this->logger->info("Events list was viewed.");
+        }
 
-        return $this->respondWithData($users);
+        return $this->respondWithData($events);
     }
 }

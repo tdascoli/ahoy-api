@@ -34,6 +34,7 @@ return function (App $app) {
     $app->group('/event', function (Group $group) {
         $group->put('', \App\Application\Actions\Event\PostAction::class);
         $group->get('/{id}', \App\Application\Actions\Event\ViewAction::class);
+        $group->get('/list/{profile_id}', \App\Application\Actions\Event\ListAction::class);
     })->add(JwtMiddleware::class);
 
     $app->group('/queue', function (Group $group) {

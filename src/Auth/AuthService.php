@@ -35,4 +35,18 @@ final class AuthService
         $profile = $this->profileRepository->getByDeviceId($deviceId);
         return password_verify($password, $profile->getPassword());
     }
+
+    /**
+     * Verify device id and profile id.
+     *
+     * @param string $deviceId
+     * @param int $profileId
+     * @return bool
+     * @throws ProfileNotFoundException
+     */
+    public function verifyDeviceIdWithProfileId(string $deviceId, int $profileId): bool
+    {
+        $profile = $this->profileRepository->getByDeviceId($deviceId);
+        return ($profile->getUid() == $profileId);
+    }
 }

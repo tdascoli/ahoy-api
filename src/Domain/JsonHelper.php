@@ -17,6 +17,9 @@ abstract class JsonHelper
         if (is_bool($val)){
             return ($val ? 1 : 0);
         }
+        else if (is_string($val)){
+            return ($val == "1" ? 1 : 0);
+        }
         return (boolval($val) ? 1 : 0);
     }
 

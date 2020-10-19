@@ -4,9 +4,10 @@ declare(strict_types=1);
 namespace App\Infrastructure\Persistence\Event;
 
 use App\Domain\Event\Event;
-use App\Domain\Event\QueueNotFoundException;
+use App\Domain\Event\EventNotFoundException;
 use App\Domain\Event\EventRepository;
 use App\Infrastructure\Base\MySQLPersistence;
+use PDO;
 
 class DefaultEventRepository extends MySQLPersistence implements EventRepository
 {
@@ -28,6 +29,14 @@ class DefaultEventRepository extends MySQLPersistence implements EventRepository
         return $res;
     }
 
+    public function listByProfileId(int $profile_id): array
+    {
+        $stmt = $this->db->prepare("SELECT * FROM event WHERE profile_id = :profile_id");
+        $stmt->execute(array(':profile_id' => $profile_id));
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
     /**
      * {@inheritdoc}
      */
@@ -43,11 +52,13 @@ class DefaultEventRepository extends MySQLPersistence implements EventRepository
         $res = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         if (empty($res)) {
-            throw new QueueNotFoundException();
+            throw new EventNotFoundException();
         }
         else if (count($res)>1){
             $this->logger->warning("more than one event found, uid should be unique - uid: ".$uid);
         }
+        $test = json_encode($res[0]);
+        $this->logger->info("Insert/Update EVENT ${test}.");
 
         return Event::ofArray($res[0]);
     }
@@ -75,9 +86,9 @@ class DefaultEventRepository extends MySQLPersistence implements EventRepository
             'active' => $event->isActive()));
         if (!$stmt){
             // todo better exception
-            throw new QueueNotFoundException();
+            throw new EventNotFoundException();
         }
-        return $this->get($this->db->lastInsertId());
+        return $this->get((int) $this->db->lastInsertId());
     }
 
     private function update(Event $event, int $id): Event {
@@ -90,7 +101,7 @@ class DefaultEventRepository extends MySQLPersistence implements EventRepository
             'date' => $event->getDate(),
             'active' => $event->isActive()));
         if (!$result) {
-            throw new QueueNotFoundException();
+            throw new EventNotFoundException();
         }
         return $this->get($id);
     }
@@ -106,7 +117,7 @@ class DefaultEventRepository extends MySQLPersistence implements EventRepository
         $countDel = $stmt->rowCount();
 
         if ($countDel==0) {
-            throw new QueueNotFoundException();
+            throw new EventNotFoundException();
         }
         return ($countDel > 0);
     }

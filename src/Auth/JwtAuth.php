@@ -131,4 +131,41 @@ final class JwtAuth
 
         return $token->validate($data);
     }
+
+    /**
+     * Validate the access token.
+     *
+     * @param string $accessToken The JWT
+     * @param string $uid The UID to be checked
+     *
+     * @return bool The status
+     */
+    public function validateTokenAndUID(string $accessToken, string $uid): bool
+    {
+        if ($this->validateToken($accessToken)) {
+            $token = $this->createParsedToken($accessToken);
+            $tokenUID = $token->getClaim('uid','');
+            if (!empty($uid)){
+                return ($tokenUID==$uid);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Get UID from Token.
+     *
+     * @param string $accessToken The JWT
+     *
+     * @return string|null The UID
+     */
+    public function getUID(string $accessToken): ?string
+    {
+        if ($this->validateToken($accessToken)) {
+            $token = $this->createParsedToken($accessToken);
+            $tokenUID = $token->getClaim('uid','');
+            return $tokenUID;
+        }
+        return null;
+    }
 }
