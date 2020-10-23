@@ -12,10 +12,11 @@ class ListAction extends QueueAction
      */
     protected function action(): Response
     {
-        $users = $this->userRepository->findAll();
+        $event_id = (int) $this->resolveArg('event_id');
+        $queue = $this->repository->list($event_id);
 
-        $this->logger->info("Users list was viewed.");
+        $this->logger->info("Queue list was viewed.");
 
-        return $this->respondWithData($users);
+        return $this->respondWithData($queue);
     }
 }

@@ -168,6 +168,14 @@ class Queue extends JsonHelper implements JsonSerializable
     }
 
     /**
+     * @return int
+     */
+    public function getTimestamp(): int
+    {
+        return $this->timestamp;
+    }
+
+    /**
      * @return array
      */
     public function jsonSerialize()
@@ -180,7 +188,8 @@ class Queue extends JsonHelper implements JsonSerializable
             'address' => $this->address,
             'birthday' => $this->birthday,
             'mobile' => $this->mobile,
-            'email' => $this->email
+            'email' => $this->email,
+            'timestamp' => $this->timestamp
         ];
     }
 }

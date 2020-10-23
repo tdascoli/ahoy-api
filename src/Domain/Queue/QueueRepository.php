@@ -8,9 +8,10 @@ use App\Domain\Event\QueueNotFoundException;
 interface QueueRepository
 {
     /**
+     * @param int $event_id
      * @return Queue[]
      */
-    public function list(): array;
+    public function list(int $event_id): array;
 
     /**
      * @param int $id

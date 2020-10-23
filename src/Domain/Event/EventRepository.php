@@ -24,6 +24,13 @@ interface EventRepository
     public function get(int $id): Event;
 
     /**
+     * @param int $id
+     * @return EventLight
+     * @throws EventNotFoundException
+     */
+    public function getActiveEvent(int $id): EventLight;
+
+    /**
      * @param object $event
      * @param int|null $id
      * @return Event

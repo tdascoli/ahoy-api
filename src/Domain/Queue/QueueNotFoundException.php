@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Domain\Event;
+namespace App\Domain\Queue;
 
 use App\Domain\DomainException\DomainRecordNotFoundException;
 

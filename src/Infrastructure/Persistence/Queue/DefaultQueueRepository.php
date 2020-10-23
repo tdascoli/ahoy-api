@@ -3,20 +3,24 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Persistence\Queue;
 
-use App\Domain\Event\QueueNotFoundException;
+use App\Domain\Queue\QueueNotFoundException;
 use App\Domain\Queue\Queue;
 use App\Domain\Queue\QueueRepository;
 use App\Infrastructure\Base\MySQLPersistence;
+use PDO;
 
 class DefaultQueueRepository extends MySQLPersistence implements QueueRepository
 {
     /**
      * {@inheritdoc}
      */
-    public function list(): array
+    public function list(int $event_id): array
     {
         /* Create a prepared statement */
-        $stmt = $this->db->prepare("SELECT * FROM queue");
+        $stmt = $this->db->prepare("SELECT * FROM queue WHERE event_uid = :event_id");
+
+        /* execute the query */
+        $stmt->execute(array(':event_id' => $event_id));
 
         /* execute the query */
         $stmt->execute();
@@ -84,7 +88,7 @@ class DefaultQueueRepository extends MySQLPersistence implements QueueRepository
             // todo better exception
             throw new QueueNotFoundException();
         }
-        return $this->get($this->db->lastInsertId());
+        return $this->get((int) $this->db->lastInsertId());
     }
 
     private function update(Queue $queue, int $id): Queue {

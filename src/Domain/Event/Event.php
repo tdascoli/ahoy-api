@@ -56,15 +56,13 @@ class Event extends JsonHelper implements JsonSerializable
         $this->active = $active;
     }
 
-    // todo date is not correct!! -> not an int because of - in data!! check docs
-
     public static function of(object $object): Event {
         return new Event(
             self::intvalundefined($object,"uid"),
             $object->title,
             intval($object->profile_id),
             $object->secret,
-            intval($object->date),
+            self::timestamp($object->date),
             self::booleanval($object->active));
     }
 
@@ -74,7 +72,7 @@ class Event extends JsonHelper implements JsonSerializable
             $object['title'],
             intval($object['profile_id']),
             $object['secret'],
-            intval($object['date']),
+            self::timestamp($object['date']),
             self::booleanval($object['active']));
     }
 

@@ -44,4 +44,16 @@ abstract class JsonHelper
         return null;
     }
 
+    public static function timestamp($timestamp): ?int {
+        if (is_int($timestamp)){
+            return $timestamp;
+        }
+        else {
+            $strtotime = strtotime($timestamp);
+            if (!$strtotime){
+                return null;
+            }
+            return $strtotime;
+        }
+    }
 }

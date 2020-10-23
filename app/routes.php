@@ -37,8 +37,13 @@ return function (App $app) {
         $group->get('/list/{profile_id}', \App\Application\Actions\Event\ListAction::class);
     })->add(JwtMiddleware::class);
 
+    $app->group('/events', function (Group $group) {
+        $group->get('/{id}', \App\Application\Actions\Event\ViewLightAction::class);
+    });
+
     $app->group('/queue', function (Group $group) {
-        $group->post('/{event_id}', \App\Application\Actions\Queue\PostAction::class);
+        $group->put('/{event_id}', \App\Application\Actions\Queue\PostAction::class);
         $group->get('/{event_id}', \App\Application\Actions\Queue\ListAction::class)->add(JwtMiddleware::class);
+        $group->delete('/{id}', \App\Application\Actions\Queue\RemoveAction::class)->add(JwtMiddleware::class);
     });
 };

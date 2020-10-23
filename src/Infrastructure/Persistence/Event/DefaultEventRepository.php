@@ -4,9 +4,11 @@ declare(strict_types=1);
 namespace App\Infrastructure\Persistence\Event;
 
 use App\Domain\Event\Event;
+use App\Domain\Event\EventLight;
 use App\Domain\Event\EventNotFoundException;
 use App\Domain\Event\EventRepository;
 use App\Infrastructure\Base\MySQLPersistence;
+use Cake\Chronos\Chronos;
 use PDO;
 
 class DefaultEventRepository extends MySQLPersistence implements EventRepository
@@ -57,10 +59,35 @@ class DefaultEventRepository extends MySQLPersistence implements EventRepository
         else if (count($res)>1){
             $this->logger->warning("more than one event found, uid should be unique - uid: ".$uid);
         }
-        $test = json_encode($res[0]);
-        $this->logger->info("Insert/Update EVENT ${test}.");
-
         return Event::ofArray($res[0]);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getActiveEvent(int $uid): EventLight
+    {
+        $today = Chronos::create()->startOfDay()->toDateTimeString();
+        $tomorrow = Chronos::create()->addDay(1)->endOfDay()->toDateTimeString();
+        /* Create a prepared statement */
+        $stmt = $this->db->prepare("SELECT * FROM event WHERE uid = :uid AND active = 1 AND `date` BETWEEN :today AND :tomorrow");
+
+        /* execute the query */
+        $stmt->execute(array(
+            ':uid' => $uid,
+            'today' => $today,
+            'tomorrow' => $tomorrow));
+
+        /* fetch all results */
+        $res = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if (empty($res)) {
+            throw new EventNotFoundException();
+        }
+        else if (count($res)>1){
+            $this->logger->warning("more than one event found, uid should be unique - uid: ".$uid);
+        }
+        return EventLight::ofArray($res[0]);
     }
 
     /**
@@ -77,12 +104,12 @@ class DefaultEventRepository extends MySQLPersistence implements EventRepository
     }
 
     private function insert(Event $event): Event {
-        $stmt = $this->db->prepare('INSERT INTO event (title, profile_id, secret, date, active) VALUES (:title, :profile_id, :secret, :date, :active)');
+        $stmt = $this->db->prepare('INSERT INTO event (title, profile_id, secret, date, active) VALUES (:title, :profile_id, :secret, FROM_UNIXTIME(:date), :active)');
         $stmt->execute(array(
             'title' => $event->getTitle(),
             'profile_id' => $event->getProfileId(),
             'secret' => $event->getSecret(),
-            'date' => self::createDate(),
+            'date' => $event->getDate(),
             'active' => $event->isActive()));
         if (!$stmt){
             // todo better exception
@@ -92,7 +119,7 @@ class DefaultEventRepository extends MySQLPersistence implements EventRepository
     }
 
     private function update(Event $event, int $id): Event {
-        $stmt = $this->db->prepare('UPDATE event SET title = :title, profile_id = :profile_id, secret = :secret, date = :date, active = :active WHERE uid = :uid');
+        $stmt = $this->db->prepare('UPDATE event SET title = :title, profile_id = :profile_id, secret = :secret, date = FROM_UNIXTIME(:date), active = :active WHERE uid = :uid');
         $result = $stmt->execute(array(
             'uid' => $id,
             'title' => $event->getTitle(),
