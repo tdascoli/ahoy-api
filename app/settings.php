@@ -26,6 +26,9 @@ return function (ContainerBuilder $containerBuilder) {
                 // The private key
                 'private_key' => getenv('AUTH_PRIVATE_KEY'),
                 'public_key' => getenv('AUTH_PUBLIC_KEY'),
+            ],
+            'apikey' => [
+                'api_key' => getenv('API_KEY')
             ]
         ],
     ]);

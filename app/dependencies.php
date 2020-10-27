@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+use App\Auth\ApiKeyAuth;
 use App\Auth\AuthService;
 use App\Auth\JwtAuth;
 use DI\ContainerBuilder;
@@ -36,6 +37,11 @@ return function (ContainerBuilder $containerBuilder) {
             $publicKey = $config['public_key'];
 
             return new JwtAuth($issuer, $lifetime, $privateKey, $publicKey);
+        },
+        ApiKeyAuth::class => function (ContainerInterface $container) {
+            $settings = $container->get('settings');
+            $config = $settings['apikey'];
+            return new ApiKeyAuth($config['api_key']);
         },
         AuthService::class => function (ContainerInterface $container) {
             return new AuthService($container->get(\App\Domain\Profile\ProfileRepository::class));
