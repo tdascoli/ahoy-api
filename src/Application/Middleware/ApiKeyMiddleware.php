@@ -26,8 +26,8 @@ class ApiKeyMiddleware implements Middleware
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $authorization = explode(',', (string)$request->getHeaderLine('Authorization'));
-        $apikey = $authorization[1] ?? '';
+        $authorization = $request->getHeader("Authorization");
+        $apikey = $authorization[0] ?? '';
 
         if (!$apikey || !$this->apiKeyAuth->validate($apikey)) {
             $response = new Response();
